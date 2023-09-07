@@ -24,12 +24,14 @@ class WallServiceTest {
             canDelete = true,
             canEdit = true,
             markedAsAds = false,
-            isFavorite = false
+            isFavorite = false,
+            likes = Post.Likes()
         )
-
-        WallService.add(post)
-
-        assertEquals(1, post.id)
+        val returnedPost = WallService.add(post)
+        assertEquals(1, returnedPost.id)
+//        WallService.add(post)
+//
+//        assertEquals(1, post.id)
     }
 
     @Test
@@ -45,7 +47,8 @@ class WallServiceTest {
             canDelete = true,
             canEdit = true,
             markedAsAds = false,
-            isFavorite = false
+            isFavorite = false,
+            likes = Post.Likes()
         )
 
         WallService.add(post)
@@ -61,7 +64,8 @@ class WallServiceTest {
             canDelete = true,
             canEdit = true,
             markedAsAds = false,
-            isFavorite = false
+            isFavorite = false,
+            likes = Post.Likes()
         )
 
         val isUpdated = WallService.update(updatedPost)
@@ -80,7 +84,8 @@ class WallServiceTest {
             canDelete = true,
             canEdit = true,
             markedAsAds = false,
-            isFavorite = false
+            isFavorite = false,
+            likes = Post.Likes()
         )
 
         val isUpdated = WallService.update(updatedPost)

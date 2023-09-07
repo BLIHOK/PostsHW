@@ -3,7 +3,7 @@ package ru.netology
 data class Post(
     var id: Int = 0,
     val ownerId: Int = 0,
-    val date: Int =0,
+    val date: Int = 0,
     val text: String = "",
     val reposts: Int = 0,
     val views: Int = 0,
@@ -12,16 +12,24 @@ data class Post(
     val canEdit: Boolean = false,
     val markedAsAds: Boolean = false,
     val isFavorite: Boolean = false,
-    val likes: MutableList<String> = mutableListOf()
-)
+    val likes: Likes
+) {
 
-object Likes {
-    fun addLike(post: Post, userId: String) {
-        post.likes.add(userId)
-    }
+    data class Likes(
+        var quantity: Int = 0,
+        val users: MutableList<String> = mutableListOf()
+    ) {
+        fun addLike(user: String) {
+            quantity++
+            users.add(user)
+        }
 
-    fun deleteLike(post: Post, userId: String) {
-        post.likes.remove(userId)
+        fun removeLike(user: String) {
+            if (users.contains(user)) {
+                users.remove(user)
+                quantity = users.size
+            }
+        }
     }
 }
 
@@ -30,11 +38,11 @@ object WallService {
     val posts = mutableListOf<Post>()
 
     fun add(post: Post): Post {
-        post.id = nextId++
-        posts.add(post)
-        return post
+        val postCopy = post.copy(likes = post.likes.copy())
+        postCopy.id = nextId++
+        posts.add(postCopy)
+        return postCopy
     }
-
     fun update(post: Post): Boolean {
         val existingPostIndex = posts.indexOfFirst { it.id == post.id }
         if (existingPostIndex != -1) {
@@ -47,20 +55,21 @@ object WallService {
     fun likeById(postId: Int, userId: String) {
         val post = posts.find { it.id == postId }
         if (post != null) {
-            Likes.addLike(post, userId)
+            post.likes.addLike(userId)
         }
     }
 
     fun unlikeById(postId: Int, userId: String) {
         val post = posts.find { it.id == postId }
         if (post != null) {
-            Likes.deleteLike(post, userId)
+            post.likes.removeLike(userId)
         }
     }
 
     fun getById(postId: Int): Post? {
         return posts.find { it.id == postId }
     }
+
     fun clear() {
         posts.clear()
         nextId = 1
@@ -69,21 +78,24 @@ object WallService {
 }
 
 fun main(args: Array<String>) {
+    val likes = Post.Likes(quantity = 0, users = mutableListOf())
     val post = Post(
         1, 1, 2000, "Привет",
         reposts = 0, views = 0,
         postType = "Простой", canDelete = true,
         canEdit = true, markedAsAds = false,
-        isFavorite = false
+        isFavorite = false, likes = likes
     )
     val userId = "Юзер1"
 
-    val post2 = Post( ownerId = 2, date = 2010, text = "Добрый день")
+
+    val post2 = Post(ownerId = 2, date = 2010, text = "Добрый день", likes = likes)
     val userId2 = "Юзер2"
 
 
-    val post3 = Post( ownerId = 3, date = 2012, text = "Добрый вечер")
+    val post3 = Post(ownerId = 3, date = 2012, text = "Добрый вечер", likes = likes)
     val userId3 = "Юзер3"
+
 
     WallService.add(post)
     WallService.likeById(post.id, userId)
@@ -112,7 +124,8 @@ fun main(args: Array<String>) {
         canDelete = true,
         canEdit = true,
         markedAsAds = false,
-        isFavorite = false
+        isFavorite = false,
+        likes = likes
     )
 
     val isUpdated = WallService.update(updatedPost)
